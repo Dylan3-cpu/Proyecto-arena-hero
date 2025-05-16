@@ -1,4 +1,5 @@
-//Definicion y creacion de las variables globales
+// script.js
+// Variables globales
 let personajesDC = []
 let personajesMarvel = []
 let modoJuego = ""
@@ -9,25 +10,27 @@ let turnoJugador1 = true
 let vidaInicial1 = 100
 let vidaInicial2 = 100
 const estadisticasCombate = {
-    dañoRealizado: 0,
-    dañoRecibido: 0,
-    ataquesCriticos: 0,
-    ataquesDebiles: 0,
+  dañoRealizado: 0,
+  dañoRecibido: 0,
+  ataquesCriticos: 0,
+  ataquesDébiles: 0,
 }
 
-//Cargar los datos cuando el DOM este ready
+// Cargar datos cuando el DOM esté listo
 document.addEventListener("DOMContentLoaded", () => {
-    //Funcion para cargar los datos desde el json-Server
-    cargarDatos()
+  // Cargar datos desde el JSON-Server
+  cargarDatos()
 
-    //Funcion para configurar los eventos segun la pagina actual
-    configurarEventosPagina()
+  // Configurar eventos según la página actual
+  configurarEventosPagina()
 })
 
+// Función para cargar datos desde el JSON-Server
+function cargarDatos() {
+  // En un entorno real, esto sería una llamada fetch a JSON-Server
+  // Para este ejemplo, usaremos datos estáticos
 
-function cargarDatos(){
-    
-    personajesDC = [
+  personajesDC = [
     {
       id: 1,
       nombre: "Batman",
@@ -311,102 +314,104 @@ function cargarDatos(){
     },
   ]
 
-//Si el usuario esta en la pagina DcMv.html carga las tarjetas de DC y Marvel
+  // Si estamos en la página DcMv.html, cargar tarjetas DC y Marvel
   if (window.location.pathname.includes("DcMv.html")) {
-    //Funciones para cargar las secciones de los personajes
+    // Cargar ambas secciones de personajes
     cargarTarjetasPersonajes("dc-heroes", personajesDC)
     cargarTarjetasPersonajes("marvel-heroes", personajesMarvel)
   }
 }
 
-
+// Función para configurar eventos según la página actual
 function configurarEventosPagina() {
-    const rutaActual = window.location.pathname
+  const rutaActual = window.location.pathname
 
-    if (rutaActual.includes("arena.html")) {
-        //Configuracion para los eventos de la pagina Arena
-        const modos = document.querySelectorAll(".modo")
-        modos.forEach((modo) => {
-            modo.addEventListener("click", function () {
-                const id = this.getAttribute("onclick").match(/'([^']+)'/)[1]
-                seleccionarModo(id)
-            })
-        })
+  if (rutaActual.includes("arena.html")) {
+    // Configurar eventos para la página Arena
+    const modos = document.querySelectorAll(".modo")
+    modos.forEach((modo) => {
+      modo.addEventListener("click", function () {
+        const id = this.getAttribute("onclick").match(/'([^']+)'/)[1]
+        seleccionarModo(id)
+      })
+    })
+  }
+
+  if (rutaActual.includes("personajes.html")) {
+    // Configurar eventos para la página Personajes
+    document.getElementById("btn-dc").addEventListener("click", () => {
+      mostrarPersonajesUniverso("DC")
+    })
+
+    document.getElementById("btn-marvel").addEventListener("click", () => {
+      mostrarPersonajesUniverso("MARVEL")
+    })
+
+    document.getElementById("btn-aleatorio").addEventListener("click", seleccionarPersonajeAleatorio)
+    document.getElementById("btn-luchar").addEventListener("click", iniciarCombate)
+  }
+
+  if (rutaActual.includes("enfrentamiento.html")) {
+    // Configurar eventos para la página Enfrentamiento
+    cargarPersonajesCombate()
+
+    document.querySelectorAll(".ataque-aleatorio").forEach((btn) => {
+      btn.addEventListener("click", realizarAtaqueAleatorio)
+    })
+
+    // FIX: Corregido el evento de revancha para reiniciar correctamente la vida
+    document.getElementById("btn-revancha").addEventListener("click", () => {
+      reiniciarCombate()
+    });
+
+    document.getElementById("btn-nuevos-personajes").addEventListener("click", () => {
+      const rutaBase = window.location.pathname.includes("/html/") ? "" : "html/"
+      window.location.href = `${rutaBase}personajes.html`
+    })
+
+    document.getElementById("btn-nuevo-modo").addEventListener("click", () => {
+      const rutaBase = window.location.pathname.includes("/html/") ? "" : "html/"
+      window.location.href = `${rutaBase}arena.html`
+    })
+  }
+
+  // Si estamos en la página DcMv.html, configurar eventos para cargar las tarjetas según el hash
+  if (window.location.pathname.includes("DcMv.html")) {
+    // Actualizar la clase active en los enlaces según el hash
+    function actualizarNavegacion() {
+      const hash = window.location.hash || '#dcpin';
+      const dcLink = document.querySelector('a[href="#dcpin"]');
+      const marvelLink = document.querySelector('a[href="#marvelpin"]');
+      
+      if (dcLink) dcLink.classList.toggle('active', hash === '#dcpin');
+      if (marvelLink) marvelLink.classList.toggle('active', hash === '#marvelpin');
     }
-
-    if (rutaActual.includes("personajes.html")) {
-        //Configuracion de los eventos para la pagina Personajes
-        document.getElementById("btn-dc").addEventListener("click", () => {
-            mostrarPersonajesUniverso("DC")
-        })
-
-        document.getElementById("btn-Marvel").addEventListener("click", () => {
-            mostrarPersonajesUniverso("MARVEL")
-        })
-
-        document.getElementById("btn-aleatorio").addEventListener("click", seleccionarPersonajeAleatorio)
-        document.getElementById("btn-luchar").addEventListener("click", iniciarCombate)
-    }
-
-    if (rutaActual.includes("enfrentamiento.html")) {
-        cargarPersonajesCombate()
-
-        document.querySelectorAll(".ataque-aleatorio").forEach((btn) => {
-            btn.addEventListener("click", realizarAtaqueAleatorio)
-        })
-
-        document.getElementById("btn-revancha").addEventListener("click", () => {
-            reiniciarCombate()
-        });
-
-        document.getElementById("btn-nuevos-personajes").addEventListener("click", () => {
-            const rutaBase = window.location.pathname.includes("/html/") ? "" : "html/"
-            window.location.href = `${rutaBase}personajes.html`
-        })
-
-        document.getElementById("btn-nuevo-modo").addEventListener("click", () => {
-            const rutaBase = window.location.pathname.includes("/html/") ? "" : "html/"
-            window.location.href = `${rutaBase}arena.html`
-        })
-    }
-
-    //Si el usuario esta en la pagina DcMv, se configuran los eventos para cargar las tarjetas segun el hash
-    if(window.location.pathname.includes("DcMv.html")) {
-        //Funcion para actualizar la clase active en los enlaces segun el hash
-        function actualizarNavegacion() {
-            const hash = window.location.hash || '#dcpin';
-            const dcLink = document.querySelector('a[href="#dcpin"]');
-            const marvelLink = document.querySelector('a[href="#marvelpin"]');
-
-            if (dcLink) dcLink.classList.toggle('active' , hash === '#dcpin');
-            if (marvelLink) marvelLink.classList.toggle('active' , hash === '#marvelpin');
-        }
-
-        //Actualizar la navegacion cuando se carga y se cambia el hash
-        actualizarNavegacion();
-        window.addEventListener('hashchange', actualizarNavegacion);
-    }
+    
+    // Actualizar navegación al cargar y al cambiar el hash
+    actualizarNavegacion();
+    window.addEventListener('hashchange', actualizarNavegacion);
+  }
 }
 
-//Funcion para cargar las tarjetas de los personajes
+// Función para cargar tarjetas de personajes (DC o Marvel)
 function cargarTarjetasPersonajes(contenedorId, personajes) {
-    const contenedor = documento.getElementById(contenedorId)
-    if (!contenedor) return
+  const contenedor = document.getElementById(contenedorId)
+  if (!contenedor) return
 
-    contenedor.innerHTML = ""
+  contenedor.innerHTML = ""
 
-    //Definir la ruta base para las imagenes
-    const rutaBase = window.location.pathname.includes("/html/") ? "../" : ""
+  // Determinar la ruta base para las imágenes
+  const rutaBase = window.location.pathname.includes("/html/") ? "../" : ""
 
-    personajes.forEach((personaje) => {
-        const tarjeta = document.createElement("div")
-        tarjeta.className = "tarjeta"
+  personajes.forEach((personaje) => {
+    const tarjeta = document.createElement("div")
+    tarjeta.className = "tarjeta"
 
+    // Corregir la ruta de la imagen
+    const rutaImagen = `${rutaBase}${personaje.imagen || "images/placeholder.jpg"}`
 
-        const rutaImagen = `${rutaBase}${personaje.imagen || "images/placeholder.jpg"}`
-
-        tarjeta.innerHTML = `
-                <div class="tarjeta-frente">
+    tarjeta.innerHTML = `
+            <div class="tarjeta-frente">
                 <div class="tarjeta-imagen">
                     <img src="${rutaImagen}" alt="${personaje.nombre}">
                 </div>
@@ -449,52 +454,55 @@ function cargarTarjetasPersonajes(contenedorId, personajes) {
 
     contenedor.appendChild(tarjeta)
 
-    //Evento para que la tarjeta se voltee
+    // Agregar evento para voltear la tarjeta
     const botonInfo = tarjeta.querySelectorAll(".boton-info")
     botonInfo.forEach((boton) => {
-        boton.addEventListener("click", (e) => {
-            e.stopPropagation()
-            tarjeta.classList.toggle("volteada")
-        })
+      boton.addEventListener("click", (e) => {
+        e.stopPropagation()
+        tarjeta.classList.toggle("volteada")
+      })
     })
-   })
+  })
 }
 
-//Funcion para seleccionar el modo de juego
+// Función para seleccionar modo de juego
 function seleccionarModo(modo) {
-    modoJuego = modo
-    localStorage.setItem("modoJuego", modo)
+  modoJuego = modo
+  localStorage.setItem("modoJuego", modo)
 
-    //Saber la ruta correcta segun la ubicacion actual
-    const rutaBase = window.location.pathname.includes("/html/") ? "" : "html/"
-    window.location.href = `${rutaBase}personajes.html`
+  // Determinar la ruta correcta según la ubicación actual
+  const rutaBase = window.location.pathname.includes("/html/") ? "" : "html/"
+  window.location.href = `${rutaBase}personajes.html`
 }
 
-//Funcion para mostrar los personajes segun el universo seleccionado
+// Función para mostrar personajes según el universo seleccionado
 function mostrarPersonajesUniverso(universo) {
-    universoSeleccionado = universo
-    const personajes = universo === "DC" ? personajesDC : personajesMarvel
-    const contenedor = document.getElementById("personajes-container")
-    const botonesAccion = document.getElementById("botones-accion")
+  universoSeleccionado = universo
+  const personajes = universo === "DC" ? personajesDC : personajesMarvel
+  const contenedor = document.getElementById("personajes-container")
+  const botonesAccion = document.getElementById("botones-accion")
 
-    contenedor.innerHTML = ""
-    botonesAccion.style.display = "flex"
+  contenedor.innerHTML = ""
+  botonesAccion.style.display = "flex"
 
-    document.getElementById("btn-dc").classList.toggle("activate", universo === "DC")
-    document.getElementById("btn-marvel").classList.toggle("activate", universo === "MARVEL")
+  // Actualizar estilos de los botones
+  document.getElementById("btn-dc").classList.toggle("active", universo === "DC")
+  document.getElementById("btn-marvel").classList.toggle("active", universo === "MARVEL")
 
-    const rutaBase = window.location.pathname.includes("/html/") ? "../" : ""
+  // Determinar la ruta base para las imágenes
+  const rutaBase = window.location.pathname.includes("/html/") ? "../" : ""
 
-    personajes.forEach((personaje) => {
-        const card = document.createElement("div")
-        card.className = "personaje-card"
-        card.dataset.id = personaje.id
-        card.dataset.universo = personaje.universo // Identificar el universo
+  personajes.forEach((personaje) => {
+    const card = document.createElement("div")
+    card.className = "personaje-card"
+    card.dataset.id = personaje.id
+    card.dataset.universo = personaje.universo // Añadido para identificar el universo
 
-        const rutaImagen = `${rutaBase}${personaje.imagen || "images/placeholder.jpg"}`
+    // Corregir la ruta de la imagen
+    const rutaImagen = `${rutaBase}${personaje.imagen || "images/placeholder.jpg"}`
 
-        card.innerHTML = `
-                <div class="personaje-imagen">
+    card.innerHTML = `
+            <div class="personaje-imagen">
                 <img src="${rutaImagen}" alt="${personaje.nombre}">
             </div>
             <div class="personaje-datos">
@@ -506,156 +514,156 @@ function mostrarPersonajesUniverso(universo) {
                     <p><strong>Vida:</strong> <span class="stat-valor">${personaje.vida}</span></p>
                 </div>
             </div>
-          `
+        `
 
-        contenedor.appendChild(card)
+    contenedor.appendChild(card)
 
-        // Evento para seleccionar personaje
-        card.addEventListener("click", () => {
-            seleccionarPersonaje(personaje)
-        })
+    // Agregar evento para seleccionar personaje
+    card.addEventListener("click", () => {
+      seleccionarPersonaje(personaje)
     })
+  })
 }
 
-// Funciona para seleccionar personaje
+// Función para seleccionar personaje
 function seleccionarPersonaje(personaje) {
-    const cards = document.querySelectorAll(".personaje-card")
+  const cards = document.querySelectorAll(".personaje-card")
 
-    const rutaBase = window.location.pathname.includes("/html/") ? "../" : ""
+  // Determinar la ruta base para las imágenes
+  const rutaBase = window.location.pathname.includes("/html/") ? "../" : ""
 
-    // Ver si el personaje ya esta seleccionado
-    if (personajeSeleccionado1 && personaje.id === personajeSeleccionado1.id && personaje.universo === personajeSeleccionado1.universo) {
-        // Deseleccionar el personaje 1
-        personajeSeleccionado1 = null
+  // CORRECCIÓN: Verificar si el personaje ya está seleccionado para permitir deseleccionarlo
+  if (personajeSeleccionado1 && personaje.id === personajeSeleccionado1.id && personaje.universo === personajeSeleccionado1.universo) {
+    // Deseleccionar el personaje 1
+    personajeSeleccionado1 = null
+    
+    // Quitar la marca de seleccionado
+    cards.forEach((card) => {
+      if (Number.parseInt(card.dataset.id) === personaje.id && card.dataset.universo === personaje.universo) {
+        card.classList.remove("seleccionado")
+      }
+    })
+    
+    // Limpiar la visualización del personaje 1
+    const divPersonaje1 = document.getElementById("personaje1")
+    divPersonaje1.querySelector(".imagen-personaje").innerHTML = ""
+    divPersonaje1.querySelector(".info-personaje").innerHTML = ""
+    
+    // Deshabilitar el botón de luchar
+    document.getElementById("btn-luchar").disabled = true
+    
+    return
+  }
+  
+  if (personajeSeleccionado2 && personaje.id === personajeSeleccionado2.id && personaje.universo === personajeSeleccionado2.universo) {
+    // Deseleccionar el personaje 2
+    personajeSeleccionado2 = null
+    
+    // Quitar la marca de seleccionado
+    cards.forEach((card) => {
+      if (Number.parseInt(card.dataset.id) === personaje.id && card.dataset.universo === personaje.universo) {
+        card.classList.remove("seleccionado")
+      }
+    })
+    
+    // Limpiar la visualización del personaje 2
+    const divPersonaje2 = document.getElementById("personaje2")
+    divPersonaje2.querySelector(".imagen-personaje").innerHTML = ""
+    divPersonaje2.querySelector(".info-personaje").innerHTML = ""
+    
+    // Deshabilitar el botón de luchar
+    document.getElementById("btn-luchar").disabled = true
+    
+    return
+  }
 
-        // Quitar la seleccion
-        cards.forEach((card) => {
-            if (Number.parseInt(card.dataset.id) === personaje.id && card.dataset.universo === personaje.universo) {
-                card.classList.remove("seleccionado")
-            }
-        })
+  // CORRECCIÓN: Permitir seleccionar cualquier personaje para cualquier jugador
+  if (!personajeSeleccionado1) {
+    personajeSeleccionado1 = personaje
 
-        // Limpiar la vista del personaje 1
-        const divPersonaje1 = document.getElementById("personaje1")
-        divPersonaje1.querySelector(".imagen-personaje").innerHTML = ""
-        divPersonaje1.querySelector(".info-personaje").innerHTML = ""
+    // Marcar la tarjeta como seleccionada
+    cards.forEach((card) => {
+      if (Number.parseInt(card.dataset.id) === personaje.id && card.dataset.universo === personaje.universo) {
+        card.classList.add("seleccionado")
+      }
+    })
 
-        // Desactivar el boton de luchar
-        document.getElementById("btn-luchar").disabled = true
+    // Mostrar el personaje seleccionado
+    const divPersonaje1 = document.getElementById("personaje1")
+    // Corregir la ruta de la imagen
+    const rutaImagen = `${rutaBase}${personaje.imagen || "images/placeholder.jpg"}`
 
-        return
-    }
+    divPersonaje1.querySelector(".imagen-personaje").innerHTML = `<img src="${rutaImagen}" alt="${personaje.nombre}">`
+    divPersonaje1.querySelector(".info-personaje").innerHTML = `
+            <h3>${personaje.nombre}</h3>
+            <p><strong>Fuerza:</strong> <span class="stat-valor">${personaje.fuerza}</span></p>
+            <p><strong>Ataque:</strong> <span class="stat-valor">${personaje.ataque}</span></p>
+            <p><strong>Vida:</strong> <span class="stat-valor">${personaje.vida}</span></p>
+            <p><strong>Debilidad:</strong> <span class="stat-valor">${personaje.debilidad}</span></p>
+        `
+  } else if (!personajeSeleccionado2) {
+    personajeSeleccionado2 = personaje
 
-    if (personajeSeleccionado2 && personaje.id === personajeSeleccionado2.id && personaje.universo === personajeSeleccionado2.universo) {
-        // Deseleccionar el personaje 2
-        personajeSeleccionado2 = null
-        
-        // Quitar la seleccion
-        cards.forEach((card) => {
-        if (Number.parseInt(card.dataset.id) === personaje.id && card.dataset.universo === personaje.universo) {
-            card.classList.remove("seleccionado")
-        }
-        })
-        
-        // Limpiar la vista del personaje 2
-        const divPersonaje2 = document.getElementById("personaje2")
-        divPersonaje2.querySelector(".imagen-personaje").innerHTML = ""
-        divPersonaje2.querySelector(".info-personaje").innerHTML = ""
-        
-        // Desactivar el botón de luchar
-        document.getElementById("btn-luchar").disabled = true
-        
-        return
-    }
+    // Marcar la tarjeta como seleccionada
+    cards.forEach((card) => {
+      if (Number.parseInt(card.dataset.id) === personaje.id && card.dataset.universo === personaje.universo) {
+        card.classList.add("seleccionado")
+      }
+    })
 
-    // seleccionar cualquier personaje para cualquier jugador
-    if (!personajeSeleccionado1) {
-        personajeSeleccionado1 = personaje
+    // Mostrar el personaje seleccionado
+    const divPersonaje2 = document.getElementById("personaje2")
+    // Corregir la ruta de la imagen
+    const rutaImagen = `${rutaBase}${personaje.imagen || "images/placeholder.jpg"}`
 
-        // Marcar la tarjeta como seleccionada
-        cards.forEach((card) => {
-            if(Number.parseInt(card.dataset.id) === personaje.id && card.dataset.universo === personaje.universo) {
-                card.classList.add("seleccionado")
-            }
-        })
+    divPersonaje2.querySelector(".imagen-personaje").innerHTML = `<img src="${rutaImagen}" alt="${personaje.nombre}">`
+    divPersonaje2.querySelector(".info-personaje").innerHTML = `
+            <h3>${personaje.nombre}</h3>
+            <p><strong>Fuerza:</strong> <span class="stat-valor">${personaje.fuerza}</span></p>
+            <p><strong>Ataque:</strong> <span class="stat-valor">${personaje.ataque}</span></p>
+            <p><strong>Vida:</strong> <span class="stat-valor">${personaje.vida}</span></p>
+            <p><strong>Debilidad:</strong> <span class="stat-valor">${personaje.debilidad}</span></p>
+        `
 
-
-        const divPersonaje1 = document.getElementById("personaje1")
-        const rutaImagen = `${rutaBase}${personaje.imagen || "images/placeholder.jpg"}`
-
-        divPersonaje1.querySelector(".imagen-personaje").innerHTML = `<img src="${rutaImagen}" alt="${personaje.nombre}">`
-        divPersonaje1.querySelector(".info-personaje").innerHTML = `
-                <h3>${personaje.nombre}</h3>
-                <p><strong>Fuerza:</strong> <span class="stat-valor">${personaje.fuerza}</span></p>
-                <p><strong>Ataque:</strong> <span class="stat-valor">${personaje.ataque}</span></p>
-                <p><strong>Vida:</strong> <span class="stat-valor">${personaje.vida}</span></p>
-                <p><strong>Debilidad:</strong> <span class="stat-valor">${personaje.debilidad}</span></p>
-            `
-    } else if (!personajeSeleccionado2) {
-        personajeSeleccionado2 = personaje
-
-
-        // Marcar la tarjeta como seleccionada
-        cards.forEach((card) => {
-            if (Number.parseInt(card.dataset.id) === personaje.id && card.dataset.universo === personaje.universo) {
-                card.classList.add("seleccionado")
-            }
-        })
-
-        // Mostrar el personaje seleccionado
-        const divPersonaje2 = document.getElementById("personaje2")
-        // Corregir la ruta de la imagen
-        const rutaImagen = `${rutaBase}${personaje.imagen || "images/placeholder.jpg"}`
-
-        divPersonaje2.querySelector(".imagen-personaje").innerHTML = `<img src="${rutaImagen}" alt="${personaje.nombre}">`
-        divPersonaje2.querySelector(".info-personaje").innerHTML = `
-                    <h3>${personaje.nombre}</h3>
-                    <p><strong>Fuerza:</strong> <span class="stat-valor">${personaje.fuerza}</span></p>
-                    <p><strong>Ataque:</strong> <span class="stat-valor">${personaje.ataque}</span></p>
-                    <p><strong>Vida:</strong> <span class="stat-valor">${personaje.vida}</span></p>
-                    <p><strong>Debilidad:</strong> <span class="stat-valor">${personaje.debilidad}</span></p>
-            `
-
-        // Habilitar el botón de luchar
-        document.getElementById("btn-luchar").disabled = false
-    }
+    // Habilitar el botón de luchar
+    document.getElementById("btn-luchar").disabled = false
+  }
 }
 
-// Funcion para seleccionar personaje aleatorio
+// Función para seleccionar personaje aleatorio
 function seleccionarPersonajeAleatorio() {
-    if (!universoSeleccionado) {
-        alert("Primero debes seleccionar un universo (Dc o Marvel)")
-        return
-    }
+  if (!universoSeleccionado) {
+    alert("Primero debes seleccionar un universo (DC o MARVEL)")
+    return
+  }
 
-    const personajes = universoSeleccionado === "DC" ? personajesDC : personajesMarvel
+  const personajes = universoSeleccionado === "DC" ? personajesDC : personajesMarvel
 
-    // Si no hay  personaje 1 seleccionado, elegir uno aleatorio
-    if (!personajeSeleccionado1) {
-        const indiceAleatorio = Math.floor(Math.random() * personajes.length)
-        seleccionarPersonaje(personajes[indiceAleatorio])
-    }
-    // Si no hay  personaje 2 seleccionado, elegir uno aleatorio
-    else if (!personajeSeleccionado2) {
-        // Permitir seleccionar cualquier personaje, incluso el mismo que el jugador 1
-        const indiceAleatorio = Math.floor(Math.random() * personajes.length)
-        seleccionarPersonaje(personajes[indiceAleatorio])
-    }
+  // Si no hay personaje 1 seleccionado, seleccionar uno aleatorio
+  if (!personajeSeleccionado1) {
+    const indiceAleatorio = Math.floor(Math.random() * personajes.length)
+    seleccionarPersonaje(personajes[indiceAleatorio])
+  }
+  // Si no hay personaje 2 seleccionado, seleccionar uno aleatorio
+  else if (!personajeSeleccionado2) {
+    // CORRECCIÓN: Permitir seleccionar cualquier personaje, incluso el mismo que el jugador 1
+    const indiceAleatorio = Math.floor(Math.random() * personajes.length)
+    seleccionarPersonaje(personajes[indiceAleatorio])
+  }
 }
 
-
+// Función para iniciar combate
 function iniciarCombate() {
-    if (personajeSeleccionado1 && personajeSeleccionado2) {
-        // Guardar los personajes seleccionados en el localStorage
-        localStorage.setItem("personaje1", JSON.stringify(personajeSeleccionado1))
-        localStorage.setItem("personaje2", JSON.stringify(personajeSeleccionado2))
+  if (personajeSeleccionado1 && personajeSeleccionado2) {
+    // Guardar los personajes seleccionados en localStorage
+    localStorage.setItem("personaje1", JSON.stringify(personajeSeleccionado1))
+    localStorage.setItem("personaje2", JSON.stringify(personajeSeleccionado2))
 
-        // Llevar a la pagina de enfrentamiento
-        const rutaBase = window.location.pathname.includes("/html/") ? "" : "html/"
-        window.location.href = `${rutaBase}enfrentamiento.html`
-    }
+    // Redirigir a la página de enfrentamiento
+    const rutaBase = window.location.pathname.includes("/html/") ? "" : "html/"
+    window.location.href = `${rutaBase}enfrentamiento.html`
+  }
 }
-
 
 // Función para cargar personajes en la página de combate
 function cargarPersonajesCombate() {
@@ -663,11 +671,11 @@ function cargarPersonajesCombate() {
   const personaje1 = JSON.parse(localStorage.getItem("personaje1"))
   const personaje2 = JSON.parse(localStorage.getItem("personaje2"))
 
-    if (!personaje1 || !personaje2) {
-        const rutaBase = window.location.pathname.includes("/html/") ? "" : "html/"
-        window.location.href = `${rutaBase}personajes.html`
-        return
-    }
+  if (!personaje1 || !personaje2) {
+    const rutaBase = window.location.pathname.includes("/html/") ? "" : "html/"
+    window.location.href = `${rutaBase}personajes.html`
+    return
+  }
 
   // Guardar vida inicial
   vidaInicial1 = personaje1.vida
@@ -693,21 +701,21 @@ function cargarPersonajesCombate() {
   // Cargar ataques del personaje 1
   const listaAtaquesIzquierda = divIzquierda.querySelector(".lista-ataques")
   listaAtaquesIzquierda.innerHTML = "" // Limpiar ataques existentes
-    personaje1.ataques.forEach((ataque) => {
-        const botonAtaque = document.createElement("button")
-        botonAtaque.className = ataque.tipo === "Crítico" ? "ataque-btn tipo-especial" : "ataque-btn"
-        botonAtaque.textContent = `${ataque.nombre} (${ataque.daño})`
-        botonAtaque.dataset.nombre = ataque.nombre
-        botonAtaque.dataset.daño = ataque.daño
-        botonAtaque.dataset.tipo = ataque.tipo
-        botonAtaque.dataset.animacion = ataque.animacion
+  personaje1.ataques.forEach((ataque) => {
+    const botonAtaque = document.createElement("button")
+    botonAtaque.className = ataque.tipo === "Crítico" ? "ataque-btn tipo-especial" : "ataque-btn"
+    botonAtaque.textContent = `${ataque.nombre} (${ataque.daño})`
+    botonAtaque.dataset.nombre = ataque.nombre
+    botonAtaque.dataset.daño = ataque.daño
+    botonAtaque.dataset.tipo = ataque.tipo
+    botonAtaque.dataset.animacion = ataque.animacion
 
-        botonAtaque.addEventListener("click", () => {
-            realizarAtaque(personaje1, personaje2, ataque)
-        })
-
-        listaAtaquesIzquierda.appendChild(botonAtaque)
+    botonAtaque.addEventListener("click", () => {
+      realizarAtaque(personaje1, personaje2, ataque)
     })
+
+    listaAtaquesIzquierda.appendChild(botonAtaque)
+  })
 
   // Cargar personaje derecho
   const divDerecha = document.getElementById("personaje-derecha")
@@ -723,20 +731,20 @@ function cargarPersonajesCombate() {
   const listaAtaquesDerecha = divDerecha.querySelector(".lista-ataques")
   listaAtaquesDerecha.innerHTML = "" // Limpiar ataques existentes
   personaje2.ataques.forEach((ataque) => {
-        const botonAtaque = document.createElement("button")
-        botonAtaque.className = ataque.tipo === "Crítico" ? "ataque-btn tipo-especial" : "ataque-btn"
-        botonAtaque.textContent = `${ataque.nombre} (${ataque.daño})`
-        botonAtaque.dataset.nombre = ataque.nombre
-        botonAtaque.dataset.daño = ataque.daño
-        botonAtaque.dataset.tipo = ataque.tipo
-        botonAtaque.dataset.animacion = ataque.animacion
+    const botonAtaque = document.createElement("button")
+    botonAtaque.className = ataque.tipo === "Crítico" ? "ataque-btn tipo-especial" : "ataque-btn"
+    botonAtaque.textContent = `${ataque.nombre} (${ataque.daño})`
+    botonAtaque.dataset.nombre = ataque.nombre
+    botonAtaque.dataset.daño = ataque.daño
+    botonAtaque.dataset.tipo = ataque.tipo
+    botonAtaque.dataset.animacion = ataque.animacion
 
-        botonAtaque.addEventListener("click", () => {
-            realizarAtaque(personaje2, personaje1, ataque)
-        })
-
-        listaAtaquesDerecha.appendChild(botonAtaque)
+    botonAtaque.addEventListener("click", () => {
+      realizarAtaque(personaje2, personaje1, ataque)
     })
+
+    listaAtaquesDerecha.appendChild(botonAtaque)
+  })
 
   // Configurar el modo de juego
   configurarModoJuego()
@@ -746,47 +754,47 @@ function cargarPersonajesCombate() {
 function configurarModoJuego() {
   const modo = localStorage.getItem("modoJuego")
 
-    if (modo === "usuario-ia") {
-        // Deshabilitar controles del personaje 2 (IA)
-        const divDerecha = document.getElementById("personaje-derecha")
-        divDerecha.querySelectorAll("button").forEach((btn) => {
-        btn.disabled = true
-        })
+  if (modo === "usuario-ia") {
+    // Deshabilitar controles del personaje 2 (IA)
+    const divDerecha = document.getElementById("personaje-derecha")
+    divDerecha.querySelectorAll("button").forEach((btn) => {
+      btn.disabled = true
+    })
 
-        // La IA realizará ataques automáticamente cuando sea su turno
-    } else if (modo === "ia-ia") {
-        // Deshabilitar controles de ambos personajes
-        document.querySelectorAll(".personaje-combate button").forEach((btn) => {
-        btn.disabled = true
-        })
+    // La IA realizará ataques automáticamente cuando sea su turno
+  } else if (modo === "ia-ia") {
+    // Deshabilitar controles de ambos personajes
+    document.querySelectorAll(".personaje-combate button").forEach((btn) => {
+      btn.disabled = true
+    })
 
-        // Iniciar combate automático
-        setTimeout(combateAutomatico, 1000)
-    }
+    // Iniciar combate automático
+    setTimeout(combateAutomatico, 1000)
+  }
   // En modo usuario-usuario, ambos controles están habilitados por defecto
 }
 
 // Función para realizar ataque aleatorio
 function realizarAtaqueAleatorio() {
-    if (turnoJugador1) {
-        const ataqueAleatorio = personajeSeleccionado1.ataques[Math.floor(Math.random() * personajeSeleccionado1.ataques.length)]
-        realizarAtaque(personajeSeleccionado1, personajeSeleccionado2, ataqueAleatorio)
-    } else {
-        const ataqueAleatorio = personajeSeleccionado2.ataques[Math.floor(Math.random() * personajeSeleccionado2.ataques.length)]
-        realizarAtaque(personajeSeleccionado2, personajeSeleccionado1, ataqueAleatorio)
-    }
+  if (turnoJugador1) {
+    const ataqueAleatorio = personajeSeleccionado1.ataques[Math.floor(Math.random() * personajeSeleccionado1.ataques.length)]
+    realizarAtaque(personajeSeleccionado1, personajeSeleccionado2, ataqueAleatorio)
+  } else {
+    const ataqueAleatorio = personajeSeleccionado2.ataques[Math.floor(Math.random() * personajeSeleccionado2.ataques.length)]
+    realizarAtaque(personajeSeleccionado2, personajeSeleccionado1, ataqueAleatorio)
+  }
 }
 
 // Función para realizar ataque
 function realizarAtaque(atacante, defensor, ataque) {
-  // Verificar si es el turno correcto usando ID y universo
+  // CORRECCIÓN: Verificar si es el turno correcto usando ID y universo
   const esAtacante1 = atacante.id === personajeSeleccionado1.id && atacante.universo === personajeSeleccionado1.universo;
   const esAtacante2 = atacante.id === personajeSeleccionado2.id && atacante.universo === personajeSeleccionado2.universo;
   
-    if ((turnoJugador1 && !esAtacante1) || (!turnoJugador1 && !esAtacante2)) {
-        mostrarMensaje("¡No es tu turno!")
-        return
-    }
+  if ((turnoJugador1 && !esAtacante1) || (!turnoJugador1 && !esAtacante2)) {
+    mostrarMensaje("¡No es tu turno!")
+    return
+  }
 
   // Calcular daño
   let daño = Number.parseInt(ataque.daño)
@@ -794,67 +802,67 @@ function realizarAtaque(atacante, defensor, ataque) {
   let esDebil = false
 
   // Verificar si el ataque es crítico (debilidad del defensor)
-    if (ataque.tipo.toLowerCase() === defensor.debilidad.toLowerCase()) {
-        daño = Math.round(daño * 1.5)
-        esCritico = true
-        estadisticasCombate.ataquesCriticos++
-    }
+  if (ataque.tipo.toLowerCase() === defensor.debilidad.toLowerCase()) {
+    daño = Math.round(daño * 1.5)
+    esCritico = true
+    estadisticasCombate.ataquesCriticos++
+  }
 
   // Verificar si el ataque es débil
-    if (ataque.tipo === "Débil") {
-        daño = Math.round(daño * 0.7)
-        esDebil = true
-        estadisticasCombate.ataquesDébiles++
-    }
+  if (ataque.tipo === "Débil") {
+    daño = Math.round(daño * 0.7)
+    esDebil = true
+    estadisticasCombate.ataquesDébiles++
+  }
 
   // Actualizar estadísticas
-    if (turnoJugador1) {
-        estadisticasCombate.dañoRealizado += daño
-    } else {
-        estadisticasCombate.dañoRecibido += daño
-    }
+  if (turnoJugador1) {
+    estadisticasCombate.dañoRealizado += daño
+  } else {
+    estadisticasCombate.dañoRecibido += daño
+  }
 
   // Mostrar animación de ataque
   mostrarAnimacionAtaque(ataque.nombre, ataque.animacion, esCritico)
 
-  // Crear copias profundas de los personajes para evitar problemas de referencia
+  // FIX: Crear copias profundas de los personajes para evitar problemas de referencia
   let personaje1Actualizado = JSON.parse(JSON.stringify(personajeSeleccionado1));
   let personaje2Actualizado = JSON.parse(JSON.stringify(personajeSeleccionado2));
   
   // Restar daño a la vida del defensor
-    if (esAtacante1) {
-        personaje2Actualizado.vida -= daño;
-        if (personaje2Actualizado.vida < 0) personaje2Actualizado.vida = 0;
-        
-        // Actualizar el personaje2 en la variable global y localStorage
-        personajeSeleccionado2 = personaje2Actualizado;
-        localStorage.setItem("personaje2", JSON.stringify(personaje2Actualizado));
-        
-        // Actualizar la vida en la interfaz
-        actualizarVidaEnInterfaz(personaje2Actualizado, false);
-        
-        // Verificar si el combate ha terminado
-        if (personaje2Actualizado.vida <= 0) {
-        finalizarCombate(atacante);
-        return;
-        }
-    } else {
-        personaje1Actualizado.vida -= daño;
-        if (personaje1Actualizado.vida < 0) personaje1Actualizado.vida = 0;
-        
-        // Actualizar el personaje1 en la variable global y localStorage
-        personajeSeleccionado1 = personaje1Actualizado;
-        localStorage.setItem("personaje1", JSON.stringify(personaje1Actualizado));
-        
-        // Actualizar la vida en la interfaz
-        actualizarVidaEnInterfaz(personaje1Actualizado, true);
-        
-        // Verificar si el combate ha terminado
-        if (personaje1Actualizado.vida <= 0) {
-            finalizarCombate(atacante);
-            return;
-        }
+  if (esAtacante1) {
+    personaje2Actualizado.vida -= daño;
+    if (personaje2Actualizado.vida < 0) personaje2Actualizado.vida = 0;
+    
+    // Actualizar el personaje2 en la variable global y localStorage
+    personajeSeleccionado2 = personaje2Actualizado;
+    localStorage.setItem("personaje2", JSON.stringify(personaje2Actualizado));
+    
+    // Actualizar la vida en la interfaz
+    actualizarVidaEnInterfaz(personaje2Actualizado, false);
+    
+    // Verificar si el combate ha terminado
+    if (personaje2Actualizado.vida <= 0) {
+      finalizarCombate(atacante);
+      return;
     }
+  } else {
+    personaje1Actualizado.vida -= daño;
+    if (personaje1Actualizado.vida < 0) personaje1Actualizado.vida = 0;
+    
+    // Actualizar el personaje1 en la variable global y localStorage
+    personajeSeleccionado1 = personaje1Actualizado;
+    localStorage.setItem("personaje1", JSON.stringify(personaje1Actualizado));
+    
+    // Actualizar la vida en la interfaz
+    actualizarVidaEnInterfaz(personaje1Actualizado, true);
+    
+    // Verificar si el combate ha terminado
+    if (personaje1Actualizado.vida <= 0) {
+      finalizarCombate(atacante);
+      return;
+    }
+  }
 
   // Cambiar turno
   turnoJugador1 = !turnoJugador1;
@@ -864,10 +872,10 @@ function realizarAtaque(atacante, defensor, ataque) {
 
   // Si es modo usuario-ia y ahora es turno de la IA
   const modo = localStorage.getItem("modoJuego");
-    if (modo === "usuario-ia" && !turnoJugador1) {
-        // La IA realiza su ataque después de un breve retraso
-        setTimeout(ataqueIA, 1500);
-    }
+  if (modo === "usuario-ia" && !turnoJugador1) {
+    // La IA realiza su ataque después de un breve retraso
+    setTimeout(ataqueIA, 1500);
+  }
 }
 
 // NUEVA FUNCIÓN: Actualizar vida en la interfaz
@@ -878,24 +886,24 @@ function actualizarVidaEnInterfaz(personaje, esPersonaje1) {
   const porcentajeVida = (personaje.vida / vidaInicial) * 100;
   
   // Seleccionar elementos de la interfaz
-    const barraVida = document.querySelector(
-        esPersonaje1 ? "#personaje-izquierda .vida-actual" : "#personaje-derecha .vida-actual"
-    );
+  const barraVida = document.querySelector(
+    esPersonaje1 ? "#personaje-izquierda .vida-actual" : "#personaje-derecha .vida-actual"
+  );
   
-    const textoVida = document.querySelector(
-        esPersonaje1 ? "#personaje-izquierda .vida-texto" : "#personaje-derecha .vida-texto"
-    );
+  const textoVida = document.querySelector(
+    esPersonaje1 ? "#personaje-izquierda .vida-texto" : "#personaje-derecha .vida-texto"
+  );
   
   // Actualizar barra de vida
   barraVida.style.width = porcentajeVida + "%";
   textoVida.textContent = `${personaje.vida}/${vidaInicial}`;
   
   // Cambiar color según la vida restante
-    if (porcentajeVida < 30) {
-        barraVida.style.background = "linear-gradient(90deg, #ff0000, #ff5252)";
-    } else if (porcentajeVida < 60) {
-        barraVida.style.background = "linear-gradient(90deg, #ffa500, #ffb74d)";
-    }
+  if (porcentajeVida < 30) {
+    barraVida.style.background = "linear-gradient(90deg, #ff0000, #ff5252)";
+  } else if (porcentajeVida < 60) {
+    barraVida.style.background = "linear-gradient(90deg, #ffa500, #ffb74d)";
+  }
 }
 
 // Función para actualizar botones según el turno
@@ -905,18 +913,17 @@ function actualizarBotonesTurno() {
 
   const modo = localStorage.getItem("modoJuego")
 
-    if (modo === "usuario-usuario") {
-        // En modo usuario vs usuario, habilitar/deshabilitar según el turno
-        divIzquierda.querySelectorAll("button").forEach((btn) => {
-            btn.disabled = !turnoJugador1
-        })
+  if (modo === "usuario-usuario") {
+    // En modo usuario vs usuario, habilitar/deshabilitar según el turno
+    divIzquierda.querySelectorAll("button").forEach((btn) => {
+      btn.disabled = !turnoJugador1
+    })
 
-        divDerecha.querySelectorAll("button").forEach((btn) => {
-            btn.disabled = turnoJugador1
-        })
-    }
+    divDerecha.querySelectorAll("button").forEach((btn) => {
+      btn.disabled = turnoJugador1
+    })
+  }
 }
-
 
 // Función para mostrar animación de ataque
 function mostrarAnimacionAtaque(nombreAtaque, animacion, esCritico) {
@@ -934,31 +941,31 @@ function mostrarAnimacionAtaque(nombreAtaque, animacion, esCritico) {
   divAnimacion.innerHTML = ""
 
   // Añadir GIF según el tipo de animación
-    if (animacion) {
-        // Determinar la ruta base para las imágenes
-        const rutaBase = window.location.pathname.includes("/html/") ? "../" : ""
-        const gifPath = `${rutaBase}images/animations/${animacion}.gif`
+  if (animacion) {
+    // Determinar la ruta base para las imágenes
+    const rutaBase = window.location.pathname.includes("/html/") ? "../" : ""
+    const gifPath = `${rutaBase}images/animations/${animacion}.gif`
     
-        // Crear y añadir el elemento de imagen
-        const gifElement = document.createElement("img")
-        gifElement.src = gifPath
-        gifElement.alt = nombreAtaque
-        gifElement.className = "ataque-gif"
-        divAnimacion.appendChild(gifElement)
+    // Crear y añadir el elemento de imagen
+    const gifElement = document.createElement("img")
+    gifElement.src = gifPath
+    gifElement.alt = nombreAtaque
+    gifElement.className = "ataque-gif"
+    divAnimacion.appendChild(gifElement)
     
-        divAnimacion.classList.add(`animacion-${animacion}`)
-    }
+    divAnimacion.classList.add(`animacion-${animacion}`)
+  }
 
-    if (esCritico) {
-        divAnimacion.classList.add("critico")
-    }
+  if (esCritico) {
+    divAnimacion.classList.add("critico")
+  }
 
   // Quitar clases y limpiar contenido después de la animación
   setTimeout(() => {
-        divAnimacion.className = "animacion-ataque"
-        divAnimacion.innerHTML = ""
-        divMensaje.style.display = "none"
-    }, 1500)
+    divAnimacion.className = "animacion-ataque"
+    divAnimacion.innerHTML = ""
+    divMensaje.style.display = "none"
+  }, 1500)
 }
 
 // Función para ataque de la IA
@@ -975,27 +982,27 @@ function ataqueIA() {
 
 // Función para combate automático (modo IA vs IA)
 function combateAutomatico() {
-  // Usar las variables globales
+  // CORRECCIÓN: Usar las variables globales actualizadas
   if (!personajeSeleccionado1 || !personajeSeleccionado2) return;
   
   // Si el combate ya terminó no hacer nada
-    if (personajeSeleccionado1.vida <= 0 || personajeSeleccionado2.vida <= 0) {
-        return
-    }
+  if (personajeSeleccionado1.vida <= 0 || personajeSeleccionado2.vida <= 0) {
+    return
+  }
 
   // Elegir ataque aleatorio según el turno
-    if (turnoJugador1) {
-        const ataqueAleatorio = personajeSeleccionado1.ataques[Math.floor(Math.random() * personajeSeleccionado1.ataques.length)]
-        realizarAtaque(personajeSeleccionado1, personajeSeleccionado2, ataqueAleatorio)
-    } else {
-        const ataqueAleatorio = personajeSeleccionado2.ataques[Math.floor(Math.random() * personajeSeleccionado2.ataques.length)]
-        realizarAtaque(personajeSeleccionado2, personajeSeleccionado1, ataqueAleatorio)
-    }
+  if (turnoJugador1) {
+    const ataqueAleatorio = personajeSeleccionado1.ataques[Math.floor(Math.random() * personajeSeleccionado1.ataques.length)]
+    realizarAtaque(personajeSeleccionado1, personajeSeleccionado2, ataqueAleatorio)
+  } else {
+    const ataqueAleatorio = personajeSeleccionado2.ataques[Math.floor(Math.random() * personajeSeleccionado2.ataques.length)]
+    realizarAtaque(personajeSeleccionado2, personajeSeleccionado1, ataqueAleatorio)
+  }
 
-    // Continuar el combate automático después de un tiempo
-    if (personajeSeleccionado1.vida > 0 && personajeSeleccionado2.vida > 0) {
-        setTimeout(combateAutomatico, 2000)
-    }
+  // Continuar el combate automático después de un tiempo
+  if (personajeSeleccionado1.vida > 0 && personajeSeleccionado2.vida > 0) {
+    setTimeout(combateAutomatico, 2000)
+  }
 }
 
 // Función para finalizar combate
@@ -1020,12 +1027,12 @@ function finalizarCombate(ganador) {
   document.getElementById("ataques-criticos").textContent = estadisticasCombate.ataquesCriticos
   document.getElementById("ataques-debiles").textContent = estadisticasCombate.ataquesDébiles
 
-    document.querySelectorAll(".ataque-btn, .ataque-aleatorio").forEach((btn) => {
-        btn.disabled = true
-    })
+  document.querySelectorAll(".ataque-btn, .ataque-aleatorio").forEach((btn) => {
+    btn.disabled = true
+  })
 }
 
-// función para reiniciar el combate correctamente
+// FIX: Nueva función para reiniciar el combate correctamente
 function reiniciarCombate() {
   // Ocultar el resultado del combate
   document.getElementById("resultado-combate").style.display = "none";
@@ -1043,7 +1050,7 @@ function reiniciarCombate() {
   const personaje1Original = JSON.parse(localStorage.getItem("personaje1"));
   const personaje2Original = JSON.parse(localStorage.getItem("personaje2"));
   
-  // Restaurar la vida a los valores iniciales
+  // FIX: Restaurar la vida a los valores iniciales
   personaje1Original.vida = vidaInicial1;
   personaje2Original.vida = vidaInicial2;
   
@@ -1069,19 +1076,19 @@ function reiniciarCombate() {
   // Habilitar/deshabilitar botones según el modo de juego
   const modo = localStorage.getItem("modoJuego");
   
-    if (modo === "usuario-usuario") {
-        // Habilitar botones del jugador 1, deshabilitar los del jugador 2
-        divIzquierda.querySelectorAll("button").forEach(btn => btn.disabled = false);
-        divDerecha.querySelectorAll("button").forEach(btn => btn.disabled = true);
-    } else if (modo === "usuario-ia") {
-        // Habilitar botones del jugador 1, deshabilitar los de la IA
-        divIzquierda.querySelectorAll("button").forEach(btn => btn.disabled = false);
-        divDerecha.querySelectorAll("button").forEach(btn => btn.disabled = true);
-    } else if (modo === "ia-ia") {
-        // Deshabilitar todos los botones y reiniciar el combate automático
-        document.querySelectorAll(".personaje-combate button").forEach(btn => btn.disabled = true);
-        setTimeout(combateAutomatico, 1000);
-    }
+  if (modo === "usuario-usuario") {
+    // Habilitar botones del jugador 1, deshabilitar los del jugador 2
+    divIzquierda.querySelectorAll("button").forEach(btn => btn.disabled = false);
+    divDerecha.querySelectorAll("button").forEach(btn => btn.disabled = true);
+  } else if (modo === "usuario-ia") {
+    // Habilitar botones del jugador 1, deshabilitar los de la IA
+    divIzquierda.querySelectorAll("button").forEach(btn => btn.disabled = false);
+    divDerecha.querySelectorAll("button").forEach(btn => btn.disabled = true);
+  } else if (modo === "ia-ia") {
+    // Deshabilitar todos los botones y reiniciar el combate automático
+    document.querySelectorAll(".personaje-combate button").forEach(btn => btn.disabled = true);
+    setTimeout(combateAutomatico, 1000);
+  }
 }
 
 // Función para mostrar mensaje
@@ -1090,7 +1097,7 @@ function mostrarMensaje(mensaje) {
   divMensaje.textContent = mensaje
   divMensaje.style.display = "block"
 
-    setTimeout(() => {
-        divMensaje.style.display = "none"
-    }, 1500)
+  setTimeout(() => {
+    divMensaje.style.display = "none"
+  }, 1500)
 }
